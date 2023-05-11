@@ -32,7 +32,7 @@ docker-compose up -d
 
 ### 1.2 GITLAB的root密码
 
-docker exec -it gitlab bash
+docker exec -it gitlab bash   
 cat /etc/gitlab/initial_root_password
 ![](pic/2023-05-08-11-10-58.png)
 
