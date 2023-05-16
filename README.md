@@ -1,6 +1,6 @@
 # devops学习
 
-## 配置template虚拟机
+## 1. 配置template虚拟机
 
 下载vmware，百度自己找个例子
 
@@ -10,19 +10,24 @@ https://blog.csdn.net/weixin_44098426/article/details/128404337
 
 https://www.runoob.com/w3cnote/vmware-install-centos7.html
 
-## 安装Mobaxterm终端链接工具
+
+## 2. 配置虚拟机ip
+
+https://blog.csdn.net/li_wen_jin/article/details/127116174
+
+## 3. 安装Mobaxterm终端链接工具
 
 https://mobaxterm.mobatek.net/
 
-## 为虚拟机添加外网可以访问的端口映射
+## 4. 为虚拟机添加外网可以访问的端口映射
 用花生壳做内网穿透https://hsk.oray.com/
 获得虚拟机内网地址
 ![](pic/2023-05-12-11-21-44.png)
 
 
-## 1. Docker
+## 2. Docker
 
-### 1.1 安装docker
+### 2.1 安装docker
 
 安装依赖 
 ```
@@ -48,7 +53,7 @@ systemctl start docker
 ```
 systemctl enable docker
 ```
-### 1.2 安装docker compose
+### 2.2 安装docker compose
 去github上搜索docker/compose
 ![](pic/2023-05-12-10-20-23.png)
 
@@ -65,11 +70,24 @@ mv docker-compose /usr/bin/
 docker-compose version
 ```
 
-## 1. GITLAB
+## 3. GITLAB
 
-### 1.1 Docker安装GITLAB
+### 3.1 Docker安装GITLAB
 
-* docker pull gitlab/gitlab-ce
+* 关闭防火墙并创建docker目录
+```
+systemctl stop firewalld
+cd /usr/local
+mkdir docker
+cd docker/
+mkdir gitlab_docker
+vi docker-compose.yml
+```
+
+* 拉取gitlab镜像
+```
+docker pull gitlab/gitlab-ce
+```
 
 * 新建docker-compose.yml
 ```
@@ -81,7 +99,7 @@ services:
     restart: always
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'http://127.0.0.1:8929'
+        external_url 'http://192.168.226.129:8929'
         gitlab_rails['gitlab_shell_ssh_port'] = 2224
     ports:
       - '8929:8929'
@@ -91,14 +109,101 @@ services:
       - './logs:/var/log/gitlab'
       - './data:/var/opt/gitlab'
 ```
+```
 docker-compose up -d
+```
 
-* 多等一会儿，然后浏览器输入127.0.0.1:8929检验
+多等一会儿，然后浏览器输入192.168.226.128:8929检验
 
-### 1.2 GITLAB的root密码
+* 做花生壳穿透
+![](pic/2023-05-16-10-54-21.png)
 
+### 3.2 GITLAB的root密码
+```
 docker exec -it gitlab bash   
 cat /etc/gitlab/initial_root_password
+```
 ![](pic/2023-05-08-11-10-58.png)
 
+## 4. 安装jenkins
 
+### 4.1 下载
+去jenkins网站jenkins.io查询版本获得pull命令。
+```
+docker pull jenkins/jenkins:2.319.1-lts
+```
+
+### 4.2 用docker-compose.yml部署jenkins
+
+```
+version: '3.1'
+services:
+  jenkins:
+    image: 'jenkins/jenkins:2.319.1-lts'
+    container_name: jenkins
+    restart: always
+    ports:
+      - '8080:8080'
+      - '50000:50000'
+    volumes:
+      - './data:/var/jenkins_home/'
+```
+部署jenkin，log里会有data文件夹的错误，看log给data文件夹赋权限
+```
+docker-compose up -d  //docker-compose -f filename up -d 默认是docker-compose.yml
+                      //docker-compose -f filename down/stop/start/restart
+docker logs -f jenkins 
+chmod -R 777 data
+```
+
+log里也可以看到初始密码
+![](pic/2023-05-16-13-42-31.png)
+
+### 4.3 首次安装jenkins，启动报错Failed to update the default Update Site ‘default’. Plugin upgrades may fail
+
+https://blog.csdn.net/m0_43584016/article/details/102677494
+
+解决方案：
+先看有没有关闭防火墙,关闭防火墙后要重启docker
+```
+systemctl stop firewalld
+service docker restart
+```
+找到 C:\Users\用户名.jenkins\hudson.model.UpdateCenter.xml 文件，
+
+将 url 中的https更改为http，即去掉 https 中的 s 。
+或者更改为
+https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json
+是国内的，清华大学的镜像地址。
+
+### 4.4 用docker安装的jenkins升级办法
+https://blog.csdn.net/weixin_44443884/article/details/130573041
+
+
+### 4.5 下载jenkins插件
+
+更改jenkins插件镜像源
+https://www.cnblogs.com/mzline/p/16286152.html
+git parameter
+publish over SSH
+
+### 4.6 配置JDK, MAVEN
+
+百度搜索下载jdk和maven（maven.apache.org）, 下载linug版本.tar.gz
+解压
+```
+tar -zxvf jdk-8u341-linux-x64.tar.gz -C ./
+mv jdk1.8.0_341 jdk
+
+tar -zxvf apache-maven-3.9.2-bin.tar.gz -C ./
+mv apache-maven-3.9.2 maven
+```
+
+* 更改maven镜像地址和JDK
+修改maven/conf/settings.xml
+https://www.geek-share.com/detail/2733228929.html
+https://blog.csdn.net/qq_43698787/article/details/129781559
+
+* 在jenkins的global tool configuration中配置maven和jdk
+把maven和jdk目录移动到/usr/local/docker/jenkins/data中，/var/jenkins_home映射到这了。
+![](pic/2023-05-16-16-22-40.png)
