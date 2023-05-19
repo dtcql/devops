@@ -168,17 +168,46 @@ https://blog.csdn.net/m0_43584016/article/details/102677494
 ```
 systemctl stop firewalld
 service docker restart
+
+vmware虚拟机重启会重新启动防火墙。
+#查看firewall状态
+systemctl status firewalld.service
+
+#停止firewall
+systemctl stop firewalld.service
+
+#禁止firewall开机启动
+systemctl disable firewalld.service
+————————————————
+版权声明：本文为CSDN博主「Qfoom」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/Qfoom/article/details/108800787
 ```
 找到 C:\Users\用户名.jenkins\hudson.model.UpdateCenter.xml 文件，
 
 将 url 中的https更改为http，即去掉 https 中的 s 。
 或者更改为
-https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json
+http://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json
 是国内的，清华大学的镜像地址。
 
 ### 4.4 用docker安装的jenkins升级办法
 https://blog.csdn.net/weixin_44443884/article/details/130573041
 
+修改docker-compose添加卷映射 - './war:/usr/share/jenkins/' ，建立ref文件夹配置权限，把jenkins.war放入并配置权限，重启。
+```
+version: '3.1'
+services:
+  jenkins:
+    image: 'jenkins/jenkins:2.319.1-lts'
+    container_name: jenkins
+    restart: always
+    ports:
+      - '8080:8080'
+      - '50000:50000'
+    volumes:
+      - './data:/var/jenkins_home/'
+      - './war:/usr/share/jenkins/'
+```
+![](pic/2023-05-17-12-53-42.png)
 
 ### 4.5 下载jenkins插件
 
@@ -207,3 +236,33 @@ https://blog.csdn.net/qq_43698787/article/details/129781559
 * 在jenkins的global tool configuration中配置maven和jdk
 把maven和jdk目录移动到/usr/local/docker/jenkins/data中，/var/jenkins_home映射到这了。
 ![](pic/2023-05-16-16-22-40.png)
+
+## 5. jenkins做CI
+
+https://www.bilibili.com/video/BV13Y411E7nd?p=9&vd_source=2384206e0cca974945c9ce5d1cb7fbd0
+
+### 5.1 Develop Java Code
+### 5.2 Create Gitlab Project
+https://www.bilibili.com/video/BV1gB4y1379L/?spm_id_from=333.337.search-card.all.click&vd_source=2384206e0cca974945c9ce5d1cb7fbd0
+
+在gitlab中创建项目
+
+* 在IDEA中安装Gitlab插件
+![](pic/2023-05-18-10-19-13.png)
+
+* 在IDEA中添加Gitlab server
+![](pic/2023-05-18-10-20-24.png)
+
+* 在IDEA中添加Gitlab remote
+![](pic/2023-05-19-13-08-49.png)
+
+* 然后在IDEA中commit，push即可
+![](pic/2023-05-19-13-09-26.png)
+
+### 5.3 配置jenkins
+
+* 新建任务并连接gitlab，应用保存之后跑一边试试连接
+![](pic/2023-05-19-13-40-50.png)
+
+* 连接成功之后所有工程都会放入用户目录/var/jenkins_home的workspace目录中。
+![](pic/2023-05-19-13-51-51.png)
