@@ -278,4 +278,10 @@ build完成之后在workspace目录中会出现target目录。
 
 * maven编译的时候一定要注意spring和JDK的版本，有的spring需要的JDK版本高。
 
-### 5.4 配置jenkins
+### 5.4 CD操作  配置jenkins的SSH
+
+* 配置SSH server
+![](pic/2023-05-23-13-22-23.png)
+
+* 给jenkins project添加构建后操作
+![](pic/2023-05-23-13-23-21.png)
