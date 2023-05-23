@@ -242,6 +242,10 @@ https://blog.csdn.net/qq_43698787/article/details/129781559
 https://www.bilibili.com/video/BV13Y411E7nd?p=9&vd_source=2384206e0cca974945c9ce5d1cb7fbd0
 
 ### 5.1 Develop Java Code
+source root一定要在java folder上，要不然@RestController等注解不起作用
+![](pic/2023-05-19-14-49-55.png)
+新项目要VCS -> CREATE GIT REPOSITORY
+
 ### 5.2 Create Gitlab Project
 https://www.bilibili.com/video/BV1gB4y1379L/?spm_id_from=333.337.search-card.all.click&vd_source=2384206e0cca974945c9ce5d1cb7fbd0
 
@@ -254,6 +258,7 @@ https://www.bilibili.com/video/BV1gB4y1379L/?spm_id_from=333.337.search-card.all
 ![](pic/2023-05-18-10-20-24.png)
 
 * 在IDEA中添加Gitlab remote
+![](pic/2023-05-19-15-41-34.png)
 ![](pic/2023-05-19-13-08-49.png)
 
 * 然后在IDEA中commit，push即可
@@ -266,3 +271,11 @@ https://www.bilibili.com/video/BV1gB4y1379L/?spm_id_from=333.337.search-card.all
 
 * 连接成功之后所有工程都会放入用户目录/var/jenkins_home的workspace目录中。
 ![](pic/2023-05-19-13-51-51.png)
+
+* 设置jenkins maven构建步骤
+![](pic/2023-05-19-15-56-19.png)
+build完成之后在workspace目录中会出现target目录。
+
+* maven编译的时候一定要注意spring和JDK的版本，有的spring需要的JDK版本高。
+
+### 5.4 配置jenkins
